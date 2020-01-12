@@ -34,8 +34,26 @@ class TodoListViewController: UITableViewController {
         tableCell.textLabel?.text = itemArray[indexPath.row] //current row of the current index path
         
         return tableCell //teturn reach created table cell to the table view as a row on its own
-        
     }
+    
+//    MARK - TableView Delegate Methods
+    
+//    This method gets fired whenever a user clicks any cell in the table
+    //didSelectRowAt tells the delegate that the current row is now selected
+    override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
+        //this helps add check mark to the selected todo item
+        
+        //checks if the currently selected todo item or cell has an accessory type of checkmark, if so then we want to remove the checkmark from it by changing it to none accessorytype
+        if tableView.cellForRow(at: indexPath)?.accessoryType == .checkmark {
+             tableView.cellForRow(at: indexPath)?.accessoryType = .none// the currently selected cell or todo
+        } else {
+            tableView.cellForRow(at: indexPath)?.accessoryType = .checkmark
+        }
+        
+        //add animation after a user taps any cell then hides the grey color of the cell
+        tableView.deselectRow(at: indexPath, animated: true)
+    }
+    
     
     
     
