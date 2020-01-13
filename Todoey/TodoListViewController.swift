@@ -10,7 +10,7 @@ import UIKit
 
 class TodoListViewController: UITableViewController {
     
-    let itemArray = ["Find Shola", "Fry Egg", "Recite Qur'an"]
+    var itemArray = ["Find Shola", "Fry Egg", "Recite Qur'an"]
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -55,10 +55,34 @@ class TodoListViewController: UITableViewController {
     }
     
     
+    //MARK - ADD NEW TODO ITEM
     
-    
-    
-    
-    
+    @IBAction func addButtonPressed(_ sender: UIBarButtonItem) {
+        var textField = UITextField()
+        
+        let alert = UIAlertController(title: "Add New Todoey Item", message: "", preferredStyle: .alert)
+        
+        let action = UIAlertAction(title: "Add Item", style: .default) { (action) in
+            //what happens when the user clicks the item button on the UIAlert
+            print("Success")
+            //append whatever the user typed in the text box to the todo array item list by pushing it to the array
+            //force unwrap the text field because sometimes the text box is always empty or not
+            self.itemArray.append(textField.text!)
+            //after adding an item to the todo list, then reload the table view so it can get updated
+            //with the new todo item
+            self.tableView.reloadData()
+            print(textField.text)
+        }
+        //This part adds a text box to the pop-up alert but we cant get
+        //so we cant have the ability to get the user input because this is where the text box is being added to the alert box
+        alert.addTextField { (alertTextField) in
+            alertTextField.placeholder = "Add new item"
+            textField = alertTextField
+            //push or save the user todo item to a global variable
+        }
+        alert.addAction(action)
+        //show the Alert viewcontroller modal
+        present(alert, animated: true, completion : nil)
+    }
 }
 
