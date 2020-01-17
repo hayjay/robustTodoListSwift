@@ -11,8 +11,14 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     var itemArray = ["Find Shola", "Fry Egg", "Recite Qur'an"]
+    let defaults = UserDefaults.standard
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        //as an array of string
+        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+            itemArray = items
+        }
         // Do any additional setup after loading the view.
     }
     
@@ -28,14 +34,11 @@ class TodoListViewController: UITableViewController {
         //create a cell that is going to be a reusable cell
         //index path is the current iteration (index)
         let tableCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)// the identifier is the name of the cell property weve given to the cell on the main.stryboard
-        
-            
         //then set the label for the cell
         tableCell.textLabel?.text = itemArray[indexPath.row] //current row of the current index path
         
         return tableCell //teturn reach created table cell to the table view as a row on its own
     }
-    
 //    MARK - TableView Delegate Methods
     
 //    This method gets fired whenever a user clicks any cell in the table
@@ -70,8 +73,9 @@ class TodoListViewController: UITableViewController {
             self.itemArray.append(textField.text!)
             //after adding an item to the todo list, then reload the table view so it can get updated
             //with the new todo item
+            self.defaults.set(self.itemArray, forKey: "TodoListArray")
             self.tableView.reloadData()
-            print(textField.text)
+            
         }
         //This part adds a text box to the pop-up alert but we cant get
         //so we cant have the ability to get the user input because this is where the text box is being added to the alert box
