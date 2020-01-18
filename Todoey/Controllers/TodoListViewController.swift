@@ -10,14 +10,18 @@ import UIKit
 class TodoListViewController: UITableViewController {
     
     var itemArray = [Item]() //an array of strings
-    let defaults = UserDefaults.standard
+//    let defaults = UserDefaults.standard
+    
+    let dataFilePath = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first?.appendingPathComponent("Items.plist")
+//    print(dataFilePath)
     
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        
+        
         let newItem = Item()
         newItem.title = "Shola"
-        newItem.done = true
         itemArray.append(newItem)
         
         let newItem2 = Item()
@@ -27,8 +31,10 @@ class TodoListViewController: UITableViewController {
         let newItem3 = Item()
         newItem3.title = "Wale"
         
-        //as an array of string
-//        if let items = defaults.array(forKey: "TodoListArray") as? [String] {
+        loadItems()
+        
+        //as an array of Item from the item model
+//        if let items = defaults.array(forKey: "TodoListArray") as? [Item] {
 //            itemArray = items
 //        }
         // Do any additional setup after loading the view.
@@ -59,7 +65,7 @@ class TodoListViewController: UITableViewController {
 //        } else {
 //            tableCell.accessoryType = .none
 //        }
-//        
+//
         return tableCell //teturn reach created table cell to the table view as a row on its own
     }
 //    MARK - TableView Delegate Methods
@@ -80,7 +86,7 @@ class TodoListViewController: UITableViewController {
         //behind the scene what this does is that it forces the table view to call its data source method again
         //so that it reloads data thats meant to be inside
         
-        tableView.reloadData()
+        self.saveItems()
         
         //this helps add check mark to the selected todo item
         
@@ -118,7 +124,10 @@ class TodoListViewController: UITableViewController {
             
             //after adding an item to the todo list, then reload the table view so it can get updated
             //with the new todo item
-            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+//            self.defaults.set(self.itemArray, forKey: "TodoListArray")
+            //this would encode out data into a new property list folder
+            self.saveItems()
+            
             self.tableView.reloadData()
             
         }
@@ -132,5 +141,36 @@ class TodoListViewController: UITableViewController {
         alert.addAction(action)
         //show the Alert viewcontroller modal
         present(alert, animated: true, completion : nil)
+    }
+    
+    //MARK - Model Manipulation Methods
+    func saveItems() {
+        //this would encode out data into a new property list folder
+        let encoder = PropertyListEncoder()
+        
+        do {
+            //encode out newly added todo item data into a .plist file
+            let data = try encoder.encode(itemArray)
+            //save the data into our data file path
+            try data.write(to: dataFilePath!)
+        } catch {
+            print("Error while encoding \(error)")
+        }
+        tableView.reloadData()
+    }
+    
+    func loadItems() {
+        //adding question mark at the fron of the try would turn the Data(Con.... into optional
+        if let data = try? Data(contentsOf: dataFilePath!) {
+            //decode our todo item from the property list file
+            let decoder = PropertyListDecoder()//create new object of our decoder class
+            //the decoder.decode takes in what we want to decode which is our Item object
+            do {
+                //the second parameter is the data that we've unwrapped above which is data
+                itemArray = try decoder.decode([Item].self, from: data)
+            } catch {
+                print("An error occurred while decoding todo data \(error)")
+            }
+        }
     }
 }
