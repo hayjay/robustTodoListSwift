@@ -52,14 +52,14 @@ class TodoListViewController: UITableViewController {
         //then set the label for the cell
         tableCell.textLabel?.text = todo_item.title //current row of the current index path
         
+        tableCell.accessoryType = todo_item.done == true ? .checkmark : .none
         
-        
-        if todo_item.done == true {
-            tableCell.accessoryType = .checkmark
-        } else {
-            tableCell.accessoryType = .none
-        }
-        
+//        if todo_item.done == true {
+//            tableCell.accessoryType = .checkmark
+//        } else {
+//            tableCell.accessoryType = .none
+//        }
+//        
         return tableCell //teturn reach created table cell to the table view as a row on its own
     }
 //    MARK - TableView Delegate Methods
