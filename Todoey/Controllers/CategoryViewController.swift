@@ -8,10 +8,12 @@
 
 import UIKit
 import RealmSwift
+import ChameleonFramework
 
-class CategoryViewController: UITableViewController {
+class CategoryViewController: SwipeTableViewController{
     //create a new access point to our realm database
     let realm = try! Realm()
+    //Note: Result<Category>? is an optional so when working with this object always use optional binding to handle it or to pull result out of it using the if let keyword
     var categories : Results<Category>? //Whenever we query our realm database, the result we get back is always a Results object datatype from realm
     //serve as our CRUD interface to help us communicate with our persistent container(DB)
     
@@ -19,6 +21,7 @@ class CategoryViewController: UITableViewController {
         super.viewDidLoad()
         
         loadCategories()
+        tableView.separatorStyle = .none
     }
 
     //MARK: - TableView Data Source Methods
@@ -32,6 +35,13 @@ class CategoryViewController: UITableViewController {
         //so that we would have the ability to display to the user that No categories added yet 
         return categories?.count ?? 1
     }
+    
+//    override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+//        let cell = tableView.dequeueReusableCell(withIdentifier: "Cell") as! SwipeTableViewCell
+//        cell.delegate = self
+//        return cell
+//    }
+    
     //MARK: - Data Manipulation Methods namely : saveData and loadData
     func save(category: Category) {
         do {
@@ -44,11 +54,35 @@ class CategoryViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    //MARK: - Delete Data From Swipe
+    //overriding means weve overriden how that method updateModal should work
+    override func updateModal(at indexPath: IndexPath) {
+        if let single_selected_category = self.categories?[indexPath.row] {
+            do {
+                try self.realm.write {
+                    self.realm.delete(single_selected_category)
+                }
+            } catch {
+                print("Error saving done status, \(error)")
+            }
+        }
+                        //if a user did selected a row to delete, then lets relaod the categories data for this table view
+//                        tableView.reloadData()
+    }
+    
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         //create a reusable cell for our table view
-        let tableCell = tableView.dequeueReusableCell(withIdentifier: "CategoryCell", for: indexPath)//we've defined the identifier in the main storyboard for this ViewController screen
-        tableCell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet!"
-        return tableCell
+        //tapp into the superclass cell from superviewcontroller
+        let cell = super.tableView(tableView, cellForRowAt: indexPath) //we setup a cell usind the superclass tableView method
+        //get back the created cell from our superview controller and modify this created cell by changing the texts thats there dynamically
+        //depending if there are records from the categories to be displayed if not then we rendered one cell with text : No categories added yet! to serve as the default
+        
+//        if let category = categories?[indexPath.row] {
+            cell.textLabel?.text = categories?[indexPath.row].name ?? "No categories added yet!"
+            cell.backgroundColor = UIColor(hexString: categories?[indexPath.row].colour ?? "1D9BF6")
+//        }
+        
+        return cell
     }
     
     //MARK: - Add Button Pressed IBAction in order to add a new category using our Category Entity
@@ -60,6 +94,8 @@ class CategoryViewController: UITableViewController {
         let action = UIAlertAction(title: "Save Category", style: .default) { (action) in
             let newCategory = Category()
             newCategory.name = categoryTextField.text!
+            //append hexValue method to the color so we can get a string of the color back
+            newCategory.colour = UIColor.randomFlat().hexValue()
 
             //here we dont have to append new category to Realm DB anymore because automatically
             //what realm does is that whenever a realm field is being created or manipulated realm wathes for it and persist the data to the database
@@ -102,5 +138,5 @@ class CategoryViewController: UITableViewController {
             destinationVC.selectedCategory = categories?[indexPath.row]
         }
     }
-    
+        
 }

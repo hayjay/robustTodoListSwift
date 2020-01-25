@@ -13,6 +13,7 @@ import RealmSwift
 class Category : Object {
     //using dynamic helps us tell realm to monitor for changes even when the app is at runtime
     @objc dynamic var name : String = ""
+    @objc dynamic var colour : String = ""
 //    @objc dynamic var done : Bool = false
     //List in realm is like an array : a container type
 //    here we mean we have declared a list of items or an array of items

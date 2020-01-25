@@ -7,6 +7,8 @@ target 'Todoey' do
 
   # Pods for Todoey
 pod 'RealmSwift'
+pod 'SwipeCellKit'
+pod 'ChameleonFramework/Swift', :git => 'https://github.com/luckychris/Chameleon.git', :inhibit_warnings => true
   target 'TodoeyTests' do
     inherit! :search_paths
     # Pods for testing

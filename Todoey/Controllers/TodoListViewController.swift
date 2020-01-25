@@ -8,9 +8,10 @@
 import UIKit
 //import CoreData
 import RealmSwift
-
-class TodoListViewController: UITableViewController {
+import ChameleonFramework
+class TodoListViewController: SwipeTableViewController {
     
+    @IBOutlet weak var searchBar: UISearchBar!
     var todoItems : Results<Item>? //an array of strings
     let realm = try! Realm()
 //    let defaults = UserDefaults.standard
@@ -25,7 +26,7 @@ class TodoListViewController: UITableViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        
+        tableView.separatorStyle = .none
 //        print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
 //        let newItem = Item()
@@ -49,6 +50,30 @@ class TodoListViewController: UITableViewController {
         // Do any additional setup after loading the view.
     }
     
+    override func viewWillAppear(_ animated: Bool) {
+        //        optional binding
+        if let colourHex = selectedCategory?.colour {
+            //weve used if let so no need of adding ? at the front of selectedCategory because we are sure there must be name for this category
+            title = selectedCategory!.name
+            //the ? at the front of navigationController means if the navigation controller is not nill then
+            //we set the bar color for the navigation bar
+            guard let navBar = navigationController?.navigationBar else { //checks if navigationcontroller exist
+                fatalError("Navigation controller doesnt exist")
+            }
+            
+//            if let navBarColour = UIColor(hexString: colourHex) {
+//                navBar.barTintColor = navBarColour
+//                navBar.tintColor = ContrastColorOf(navBarColour, returnFlat: true)
+//                navBar.largeTitleTextAttributes = [NSAttributedString.Key.foregroundColor : ContrastColorOf(navBarColour, returnFlat: true)]
+//                searchBar.barTintColor = navBarColour
+//            }
+//            navBar.barTintColor = UIColor(hexString: colourHex)
+//            searchBar.barTintColor = UIColor(hexString: colourHex)
+            
+        }
+
+    }
+    
     //CREATE THE TABLE VIEW DATA SOURCE METHODS : This methods should allow us to specify what the TABLE View cells should display
     //Also How many rows we want in our TABLE VIEW UI
     
@@ -58,19 +83,34 @@ class TodoListViewController: UITableViewController {
     }
     
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
-        
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         //create a cell that is going to be a reusable cell
         //index path is the current iteration (index)
-        let tableCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)// the identifier is the name of the cell property we've given to the cell on the main.stryboard
+//        let tableCell = tableView.dequeueReusableCell(withIdentifier: "ToDoItemCell", for: indexPath)// the identifier is the name of the cell property we've given to the cell on the main.stryboard
         
         if let todo_item = todoItems?[indexPath.row] {
             //then set the label for the cell
-            tableCell.textLabel?.text = todo_item.title //current row of the current index path
+            cell.textLabel?.text = todo_item.title //current row of the current index path
+            //change the cells background by using the current index of the row and the particular item we r trying to color
+            if let colour =  UIColor(hexString: selectedCategory!.colour)?.darken(byPercentage: /*e.g say we are currently on row number 5
+                 and we have a total of 10 items in todoItems take 5/10 = 0.5
+                 */
+                CGFloat(indexPath.row) / CGFloat(todoItems!.count) //get the count if todoItems is not nil
+            ) {
+                //change the cells background by using the current index of the row and the particular item we r trying to color
+                cell.backgroundColor = colour
+                cell.textLabel?.textColor = ContrastColorOf(colour, returnFlat: true)
+            }
             
-            tableCell.accessoryType = todo_item.done == true ? .checkmark : .none
+            print("Version 1: \(CGFloat(indexPath.row / todoItems!.count))") //0/3 = 0.0
+            print("Version 2: \(CGFloat(indexPath.row) / CGFloat(todoItems!.count))")
+            
+                           
+
+            cell.accessoryType = todo_item.done == true ? .checkmark : .none
             
         } else {
-            tableCell.textLabel?.text = "No Items Added"
+            cell.textLabel?.text = "No Items Added"
         }
         
 //        if todo_item.done == true {
@@ -79,7 +119,21 @@ class TodoListViewController: UITableViewController {
 //            tableCell.accessoryType = .none
 //        }
 //
-        return tableCell //teturn reach created table cell to the table view as a row on its own
+        return cell //teturn reach created table cell to the table view as a row on its own
+    }
+    
+    override func updateModal(at indexPath: IndexPath) { //comes from our super class swipeviewcontroller
+        //take th indexPath to delete our data
+        if let item = todoItems?[indexPath.row] {
+            do {
+                try realm.write {
+                        realm.delete(item)
+                }
+            } catch {
+                    print("An error occured while trashing this todo : \(error)")
+            }
+            
+        }
     }
 //    MARK - TableView Delegate Methods
     
