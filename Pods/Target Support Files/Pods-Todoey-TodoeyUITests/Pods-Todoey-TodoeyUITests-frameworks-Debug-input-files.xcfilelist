@@ -1,0 +1,3 @@
+${PODS_ROOT}/Target Support Files/Pods-Todoey-TodoeyUITests/Pods-Todoey-TodoeyUITests-frameworks.sh
+${BUILT_PRODUCTS_DIR}/Realm/Realm.framework
+${BUILT_PRODUCTS_DIR}/RealmSwift/RealmSwift.framework
